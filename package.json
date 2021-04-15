@@ -1,0 +1,18 @@
+{
+  "name": "http-share",
+  "version": "1.0.0",
+  "description": "CLI tool for share file by http",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "File",
+    "Share"
+  ],
+  "author": "Winmin",
+  "license": "ISC",
+  "dependencies": {
+    "qrcode-terminal": "^0.12.0"
+  }
+}
