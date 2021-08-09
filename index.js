@@ -71,13 +71,22 @@ function upload_server() {
         const file_path = cwd + '/' + file_name;
 
         console.log('- New Upload:', file_name);
-        req.pipe(createWriteStream(file_path)).once('close', () => {
+        req.pipe(createWriteStream(file_path));
+        req.once('end', () => {
           res.end(`Saved to: ${file_path}`);
         });
       }
       catch (err) {
         res.end('Exception - ' + err);
       }
+    }
+    if (url === path + '/message' && req.method === 'POST') {
+      console.log('New Message:\n------');
+      req.pipe(process.stdout);
+      req.once('end', () => {
+        console.log('\n------');
+        res.end('Message Recived!');
+      });
     }
     else {
       // return upload page html

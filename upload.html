@@ -3,10 +3,20 @@
   <head>
     <title>Upload file</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      button { line-height: 2em; }
+      input { padding: 1em; background-color: beige;}
+      .w100 { width: 100%; box-sizing: border-box; }
+    </style>
   </head>
   <body>
-    <input type="file" id="file" />
-    <button onclick="doUpload()">Upload</button>
+    <h3>HTTP SHARE v0.1</h3>
+    <input class="w100" type="file" id="file" />
+    <button onclick="doUpload()" class="w100">Upload</button>
+    <hr size="1"/>
+    <textarea id="msg" class="w100" style="height: 6em;"></textarea>
+    <button onclick="doMessage()" style="width: 10em;">Send</button>
+    <button onclick="document.getElementById('msg').value=''">Clear</button>
   </body>
   <script>
     function doUpload() {
@@ -21,6 +31,17 @@
         }
         xhr.setRequestHeader('upload-file-name', encodeURIComponent(name));
         xhr.send(input.files[0]);
+      }
+    }
+    function doMessage() {
+      const msg = document.getElementById('msg').value;
+      if (msg.trim()) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', location.pathname + '/message', true);
+        xhr.onload = function(evt) {
+          alert(this.responseText);
+        }
+        xhr.send(msg);
       }
     }
   </script>
