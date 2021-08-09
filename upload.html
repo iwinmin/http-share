@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Upload file</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <input type="file" id="file" />
+    <button onclick="doUpload()">Upload</button>
+  </body>
+  <script>
+    function doUpload() {
+      const input = document.getElementById('file');
+      if (input.files.length === 1) {
+        const name = input.files[0].name;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', location.pathname + '/upload', true);
+        xhr.onload = function(evt) {
+          alert(this.responseText);
+        }
+        xhr.setRequestHeader('upload-file-name', encodeURIComponent(name));
+        xhr.send(input.files[0]);
+      }
+    }
+  </script>
+</html>
