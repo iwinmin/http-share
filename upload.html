@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Upload file</title>
+    <title>HTTP-DROP - Upload</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
       button { line-height: 2em; }
       input { padding: 1em; background-color: beige;}
       .w100 { width: 100%; box-sizing: border-box; }
+      #fileList { background: #f5f5dc; margin-top: -1em; padding-bottom: 1em; }
     </style>
   </head>
   <body>
-    <h3>HTTP SHARE v0.1</h3>
-    <input class="w100" type="file" id="file" />
+    <h3>HTTP DROP v1.0</h3>
+    <input class="w100" type="file" id="file" multiple />
+    <div id="fileList"></div>
     <button onclick="doUpload()" class="w100">Upload</button>
     <hr size="1"/>
     <textarea id="msg" class="w100" style="height: 6em;"></textarea>
@@ -19,20 +21,57 @@
     <button onclick="document.getElementById('msg').value=''">Clear</button>
   </body>
   <script>
-    function doUpload() {
-      const input = document.getElementById('file');
-      if (input.files.length === 1) {
-        const name = input.files[0].name;
-
+    function sendFile(file) {
+      return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open('POST', location.pathname + '/upload', true);
         xhr.onload = function(evt) {
-          alert(this.responseText);
+          resolve(this.responseText);
         }
-        xhr.setRequestHeader('upload-file-name', encodeURIComponent(name));
-        xhr.send(input.files[0]);
+        xhr.onerror = function(err) {
+          reject(String(err));
+        }
+        xhr.setRequestHeader('upload-file-name', encodeURIComponent(file.name));
+        xhr.send(file);
+      });
+    }
+
+    async function doUpload() {
+      const input = document.getElementById('file');
+      const results = [];
+      try {
+        for (const file of input.files) {
+          const msg = await sendFile(file);
+          results.push(`[Upload] ${msg}`);
+        }
+      }
+      catch (err) {
+          results.push(`[Error] ${err}`);
+      }
+
+      if (results.length > 0) {
+        alert(results.join('\n'));
+      }
+      else {
+        alert('No file selected');
       }
     }
+
+    document.getElementById('file').addEventListener('change', function() {
+      const div = document.getElementById('fileList');
+      const { files } = this;
+      if (files.length > 1) {
+        const html = [];
+        for (const f of files) {
+          html.push(`<li><b>${f.name}</b> (${f.size.toLocaleString('en')})</li>`);
+        }
+        div.innerHTML = '<ul>' + html.join('\n') + '</ul>';
+      }
+      else {
+        div.innerHTML = '';
+      }
+    });
+
     function doMessage() {
       const msg = document.getElementById('msg').value;
       if (msg.trim()) {

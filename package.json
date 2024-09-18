@@ -1,18 +1,16 @@
 {
-  "name": "http-share",
+  "name": "http-drop",
   "version": "1.0.0",
   "description": "CLI tool for share file by http",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": { },
   "keywords": [
     "File",
     "Share"
   ],
+  "bin": {
+    "http-drop": "index.js"
+  },
   "author": "Winmin",
-  "license": "ISC",
-  "dependencies": {
-    "qrcode-terminal": "^0.12.0"
-  }
+  "license": "MIT"
 }
