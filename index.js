@@ -39,6 +39,7 @@ function server({ file_path, token='', port=0}) {
             page = indexPage(pathroot, file_path, true);
           }
           else {
+            path = decodeURIComponent(path);
             const child_path = `${file_path}/${path}`;
             const path_stat = statSync(child_path);
 
@@ -66,7 +67,7 @@ function server({ file_path, token='', port=0}) {
           }
         }
         catch (err) {
-          res.writeHead(500).end(`Server Error: ${err.toString}`);
+          res.writeHead(500).end(`Server Error: ${err.toString()}`);
           return;
         }
       }
@@ -145,7 +146,7 @@ function indexPage(base_url, file_path, is_root) {
     html.push(
       '<tr>',
       `<td>${ent.isDirectory() ? '🗂' : '📄' }</td>`,
-      `<td><a href="${base_url}/${encodeURIComponent(ent.name)}">${ent.name.replace(/</g, '&lt;')}</a></td>`,
+      `<td><a href="${encodeURIComponent(base_url + '/' + ent.name).replaceAll('%2F','/')}">${ent.name.replace(/</g, '&lt;')}</a></td>`,
       `<td>${stat.size.toLocaleString('en')}</td>`,
       `<td>${stat.mtime.toLocaleString()}</td>`,
       '</tr>',
