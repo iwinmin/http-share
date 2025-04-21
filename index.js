@@ -6,6 +6,42 @@ const { dirname, basename } = require('node:path');
 const { networkInterfaces } = require('os');
 var qrcode = require('./vendor/qrcode-terminal');
 
+function file_content_type(file_path) {
+  const [_, ext] = file_path.match(/\.([^./]+)$/) || [];
+  const contentTypes = {
+    // 图片文件
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    bmp: 'image/bmp',
+    svg: 'image/svg+xml',
+    // 音乐文件
+    mp3: 'audio/mpeg',
+    ogg: 'audio/ogg',
+    wav: 'audio/wav',
+    // 视频文件
+    mp4: 'video/mp4',
+    webm: 'video/webm',
+    oggv: 'video/ogg',
+    // 文本文件
+    txt: 'text/plain; charset=utf-8',
+    html: 'text/html; charset=utf-8',
+    css: 'text/css; charset=utf-8',
+    js: 'text/javascript; charset=utf-8',
+    md: 'text/markdown; charset=utf-8',
+    json: 'application/json; charset=utf-8',
+    pdf: 'application/pdf',
+  };
+  const binaryTypes = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', 'exe'];
+  if (binaryTypes.includes(ext?.toLowerCase())) {
+    return 'application/octet-stream';
+  }
+  else {
+    return contentTypes[ext?.toLowerCase()] || contentTypes.txt;
+  }
+}
+
 /**
  * Service file download server
  */
@@ -50,10 +86,14 @@ function server({ file_path, token='', port=0}) {
             else {
               // file download
               const file_name = basename(path);
+              const file_type = params.view_mode ? file_content_type(path) : 'application/octet-stream';
+
               console.info('[%s] new Request - %s', (new Date()).toLocaleString(), req.socket.remoteAddress);
-              res.setHeader('Content-Type', 'application/octet-stream');
               res.setHeader('Content-Length', path_stat.size);
-              res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(file_name)}"`);
+              res.setHeader('Content-Type', file_type);
+              if (file_type === 'application/octet-stream') {
+                res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(file_name)}"`);
+              }
               createReadStream(child_path).pipe(res);
               return;
             }
@@ -75,10 +115,13 @@ function server({ file_path, token='', port=0}) {
     else if (url === pathroot) {
       // 单文件下载
       const file_name = basename(file_path);
+      const file_type = params.view_mode ? file_content_type(file_path) : 'application/octet-stream';
       console.info('[%s] new Request - %s', (new Date()).toLocaleString(), req.socket.remoteAddress);
-      res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Content-Length', stat.size);
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(file_name)}"`);
+      res.setHeader('Content-Type', file_type);
+      if (file_type === 'application/octet-stream') {
+        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(file_name)}"`);
+      }
       createReadStream(file_path).pipe(res);
       return;
     }
@@ -257,6 +300,8 @@ http-drop [OPTIONS] <file/directory>
   Start Download server for <file/directory>.
 
 OPTIONS:
+  -v, --view                    View instead of Download if supported file format
+  -i, --insecure                Server uses port 8080, path name uses [share]
   -p <number>, --port <number>  Server port number (Default: RANDOM port)
   -t <token>, --token <token>   Sefety URL path name (Default: RANDOM string)
   -h, --help                    This help screen
@@ -270,6 +315,15 @@ try {
   for (let i=0; i<argv.length; i++) {
     const arg = argv[i];
     switch (arg) {
+      case '-v':
+      case '--view':
+        params.view_mode = true;
+        break;
+      case '-i':
+      case '--insecure':
+        params.port = 8080;
+        params.token = 'share';
+        break;
       case '-p':
       case '--port':
         params.port = parseInt(argv[++i]);
