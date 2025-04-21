@@ -36,6 +36,8 @@ npm install -g git+https://github.com/iwinmin/http-share.git
 
   | Option Name | Comments |
   | -------|----------|
+  | `-v`, `--view` | View instead of Download if supported file format |
+  | `-i`, `--insecure` | Server uses port 8080, path name uses [share] |
   | `-p <number>`, `--port <number>` | Server port number (Default: RANDOM port) |
   | `-t <token>`, `--token <token>` | Sefety URL path name (Default: RANDOM string) |
   | `-h`, `--help` | Print help message |
